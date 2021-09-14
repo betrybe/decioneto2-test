@@ -1,7 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+:root {
+  --white-violet: #F1EEFC;
+  --violet: #9c72fd;
+  --royal-violet: #572fda;
+  --dark-violet: #0c0128;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  background-color: #F1EEFC;
+
+  -webkit-font-smoothing: antialiased;
+
+  min-height: 100vh;
+}
+
+button {
+  cursor: pointer;
+}
+
 .container {
   display: flex;
   justify-content: space-around;
   width: 100%;
+  min-height: 100vh;
 }
 
 .items {
@@ -9,6 +39,8 @@
   flex-basis: 70%;
   flex-wrap: wrap;
   justify-content: center;
+
+  height: 100%;
 }
 
 .item {
@@ -20,6 +52,8 @@
   height: auto;
   margin: 5px;
   width: 200px;
+
+  color: var(--dark-violet)
 }
 
 .item .item__sku {
@@ -48,10 +82,38 @@
   display: flex;
   flex-basis: 30%;
   flex-flow: column wrap;
+
+  padding: 1rem;
+
+  border-left: 1px solid var(--dark-violet);
+
+  height: 100%
 }
 
 .cart .cart__title {
-  flex-basis: 1;
-  font-size: 16pt;
   text-align: center;
+  font-weight: 700;
+  
+  margin-bottom: 1rem;
+}
+
+.empty-cart {
+  background-color: var(--violet);
+  border: 1px solid var(--violet);
+  padding: 0.8rem 2rem;
+
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 14px;
+
+  color: var(--white-violet);
+
+  border-radius: 4px;
+
+  transition: all 0.2s linear;
+}
+
+.empty-cart:hover {
+  background-color: transparent;
+  color: var(--violet)
 }
