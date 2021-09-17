@@ -40,14 +40,8 @@ function createCartItemElement({ sku, name, salePrice }) {
   return li;
 }
 
-const API = {
-  async loadProducts() {
-    const response = await fetch('https://api.mercadolibre.com/sites/MLB/search?q=computador');
-    const productList = await response.json();
-    const products = productList.results;
-
-    return products;
-  },
+const Cart = {
+  data: [],
 };
 
 const DOM = {
@@ -64,17 +58,62 @@ const DOM = {
       );
     });    
   },
+
+  addToCart(product) {
+    const cartSection = document.querySelector('.cart__items');
+
+    Cart.data = cartSection.appendChild(
+      createCartItemElement({ 
+        sku: product.id, 
+        name: product.title, 
+        salePrice: product.price, 
+      }),
+    );
+  },
+};
+
+const API = {
+  async loadProducts() {
+    const response = await fetch('https://api.mercadolibre.com/sites/MLB/search?q=computador');
+    const productList = await response.json();
+    const products = productList.results;
+
+    return products;
+  },
+
+  async loadCart(item) {
+    const response = await fetch(`https://api.mercadolibre.com/items/${item}`);
+    const cartList = await response.json();
+
+    DOM.addToCart(cartList);
+  },
+
+  getCartItem(items) {
+    const itemId = items.parentElement;
+    API.loadCart(getSkuFromProductItem(itemId));
+  },
+
+  cartAddListener() {
+    const buttons = document.getElementsByClassName('item__add');
+
+    for (let items = 0; items < buttons.length; items += 1) {
+      buttons[items].addEventListener('click', () => {
+       API.getCartItem(buttons[items]);
+      });
+    }
+  },
 };
 
 const App = {
 
   init() {
     window.onload = async () => {
-      let products = [];
+      let productsData = [];
 
       try {
-        products = await API.loadProducts();
-        DOM.populateProducts(products);
+        productsData = await API.loadProducts();
+        DOM.populateProducts(productsData);
+        API.cartAddListener();
       } catch (error) {
         console.log('Error!');
         console.log(error);
