@@ -1,3 +1,7 @@
+const Cart = {
+  data: [],
+};
+
 function createProductImageElement(imageSource) {
   const img = document.createElement('img');
   img.className = 'item__image';
@@ -34,29 +38,33 @@ function reloadCart() {
     cartSection.innerHTML = '';
 }
 
-function cartItemClickListener(event) {
-  
+function removeItem(element) {
+  Cart.data = Cart.data.filter((product, index) => index !== Number(element));
+  console.log(Cart.data);
 }
 
-function createCartItemElement({ sku, name, salePrice }) {
+function cartItemClickListener(event) {
+  event.srcElement.remove();
+  removeItem(event.srcElement.dataset.index);
+}
+
+function createCartItemElement({ index, sku, name, salePrice }) {
   const li = document.createElement('li');
   li.className = 'cart__item';
   li.innerText = `SKU: ${sku} | NAME: ${name} | PRICE: $${salePrice}`;
+  li.dataset.index = index;
   li.addEventListener('click', cartItemClickListener);
   return li;
 }
 
-const Cart = {
-  data: [],
-};
-
 const DOM = {
+  // Adiciona os produtos em tela
   populateProducts(products) {
     const sectionList = document.querySelector('.items');
 
     products.forEach((product) => {
       sectionList.appendChild(
-        createProductItemElement({ 
+        createProductItemElement({
           sku: product.id, 
           name: product.title, 
           image: product.thumbnail,
@@ -65,14 +73,16 @@ const DOM = {
     });    
   },
 
+  // Adiciona os produtos no carrinho
   populateCart() {
     const cartSection = document.querySelector('.cart__items');
 
     reloadCart();
 
-    Cart.data.forEach((product) => {
+    Cart.data.forEach((product, index) => {
       cartSection.appendChild(
-        createCartItemElement({ 
+        createCartItemElement({
+          index,
           sku: product.id, 
           name: product.title, 
           salePrice: product.price, 
@@ -84,19 +94,16 @@ const DOM = {
   getProductPrice(productPrice) {
   },
 
+  // Adiciona os produtos no array do cart
   add(product) {
     Cart.data.push(product);
     DOM.populateCart(Cart.data);
-
-    console.log(Cart.data); 
   },
-
-  remove(index) {
-  },
-
 };
 
 const API = {
+
+  // requisição dos produtos
   async loadProducts() {
     const response = await fetch('https://api.mercadolibre.com/sites/MLB/search?q=computador');
     const productList = await response.json();
@@ -105,6 +112,7 @@ const API = {
     return products;
   },
 
+  // requisição dos produtos para o cart
   async loadCart(item) {
     const response = await fetch(`https://api.mercadolibre.com/items/${item}`);
     const cartList = await response.json();
@@ -112,6 +120,7 @@ const API = {
     DOM.add(cartList);
   },
 
+  // pega o id do produto selecionado
   getCartItemId(items) {
     const itemId = items.parentElement;
     API.loadCart(getSkuFromProductItem(itemId));
