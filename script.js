@@ -99,6 +99,11 @@ const DOM = {
     Cart.data.push(product);
     DOM.populateCart(Cart.data);
   },
+
+  emptyCart() {
+    Cart.data = [];
+    DOM.populateCart();
+  },
 };
 
 const API = {
