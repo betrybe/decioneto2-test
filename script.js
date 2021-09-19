@@ -1,5 +1,15 @@
+const Storage = {
+  get() {
+    return JSON.parse(localStorage.getItem('cartproducts')) || [];
+  },
+
+  set(products) {
+    localStorage.setItem('cartproducts', JSON.stringify(products));
+  },
+};
+
 const Cart = {
-  data: [],
+  data: Storage.get(),
 };
 
 function createProductImageElement(imageSource) {
@@ -120,32 +130,6 @@ const DOM = {
 
 const API = {
 
-  // requisição dos produtos
-  async loadProducts() {
-    const response = await fetch('https://api.mercadolibre.com/sites/MLB/search?q=computador');
-    const productList = await response.json();
-    const products = productList.results;
-
-    return products;
-  },
-
-  // requisição dos produtos para o cart
-    loadCart(item) {
-    fetch(`https://api.mercadolibre.com/items/${item}`)
-    .then((response) => response.json())
-    .then((cartItems) => {
-      DOM.add(cartItems);
-      getProductPrice();
-    })
-    .catch((error) => console.log(error));
-  },
-
-  // pega o id do produto selecionado
-  getCartItemId(items) {
-    const itemId = items.parentElement;
-    API.loadCart(getSkuFromProductItem(itemId));
-  },
-
   cartAddListener() {
     const buttons = document.getElementsByClassName('item__add');
 
@@ -155,18 +139,48 @@ const API = {
       });
     }
   },
+
+  // requisição dos produtos
+  loadProducts() {
+    const loading = document.querySelector('.loading');
+
+    loading.innerHTML = 'loading';
+
+    fetch('https://api.mercadolibre.com/sites/MLB/search?q=computador')
+    .then((response) => response.json())
+    .then((products) => { 
+      loading.innerHTML = '';
+      DOM.populateProducts(products.results);
+      API.cartAddListener();
+    });
+  },
+
+  // requisição dos produtos para o cart
+    loadCart(item) {
+    fetch(`https://api.mercadolibre.com/items/${item}`)
+    .then((response) => response.json())
+    .then((cartItems) => {
+      DOM.add(cartItems);
+      getProductPrice();
+      Storage.set(Cart.data);
+    })
+    .catch((error) => console.log(error));
+  },
+
+  // pega o id do produto selecionado
+  getCartItemId(items) {
+    const itemId = items.parentElement;
+    API.loadCart(getSkuFromProductItem(itemId));
+  },
 };
 
 const App = {
 
   init() {
-    window.onload = async () => {
-      let productsData = [];
-
+    window.onload = () => {
       try {
-        productsData = await API.loadProducts();
-        DOM.populateProducts(productsData);
-        API.cartAddListener();
+        API.loadProducts();
+        DOM.populateCart();
       } catch (error) {
         console.log('Error!');
         console.log(error);
