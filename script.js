@@ -50,7 +50,6 @@ function reloadCart() {
 
 function removeItem(element) {
   Cart.data = Cart.data.filter((product, index) => index !== Number(element));
-  console.log(Cart.data);
 }
 
 function getProductPrice() {
@@ -60,10 +59,8 @@ function getProductPrice() {
   Cart.data.forEach((product) => {      
     total += product.price;
   });
-
-  console.log(total);
   
-  priceContainer.innerHTML = `Preço total: R$ ${total.toFixed(2)}`;
+  priceContainer.innerHTML = total;
 }
 
 function cartItemClickListener(event) {
@@ -94,7 +91,7 @@ const DOM = {
           image: product.thumbnail,
         }),
       );
-    });    
+    });
   },
 
   // Adiciona os produtos no carrinho
@@ -113,6 +110,8 @@ const DOM = {
         }),
       );
     });
+
+    Storage.set(Cart.data);
   },
 
   // Adiciona os produtos no array do cart
@@ -123,6 +122,7 @@ const DOM = {
 
   emptyCart() {
     Cart.data = [];
+    Storage.set(Cart.data);
     DOM.populateCart();
     getProductPrice();
   },
@@ -149,7 +149,7 @@ const API = {
     fetch('https://api.mercadolibre.com/sites/MLB/search?q=computador')
     .then((response) => response.json())
     .then((products) => { 
-      loading.innerHTML = '';
+      loading.remove();
       DOM.populateProducts(products.results);
       API.cartAddListener();
     });
@@ -181,6 +181,7 @@ const App = {
       try {
         API.loadProducts();
         DOM.populateCart();
+        getProductPrice();
       } catch (error) {
         console.log('Error!');
         console.log(error);
