@@ -43,9 +43,23 @@ function removeItem(element) {
   console.log(Cart.data);
 }
 
+function getProductPrice() {
+  const priceContainer = document.querySelector('.total-price');
+  let total = 0;
+
+  Cart.data.forEach((product) => {      
+    total += product.price;
+  });
+
+  console.log(total);
+  
+  priceContainer.innerHTML = `Preço total: R$ ${total.toFixed(2)}`;
+}
+
 function cartItemClickListener(event) {
-  event.srcElement.remove();
   removeItem(event.srcElement.dataset.index);
+  DOM.populateCart();
+  getProductPrice();
 }
 
 function createCartItemElement({ index, sku, name, salePrice }) {
@@ -91,9 +105,6 @@ const DOM = {
     });
   },
 
-  getProductPrice(productPrice) {
-  },
-
   // Adiciona os produtos no array do cart
   add(product) {
     Cart.data.push(product);
@@ -103,6 +114,7 @@ const DOM = {
   emptyCart() {
     Cart.data = [];
     DOM.populateCart();
+    getProductPrice();
   },
 };
 
@@ -118,11 +130,14 @@ const API = {
   },
 
   // requisição dos produtos para o cart
-  async loadCart(item) {
-    const response = await fetch(`https://api.mercadolibre.com/items/${item}`);
-    const cartList = await response.json();
-
-    DOM.add(cartList);
+    loadCart(item) {
+    fetch(`https://api.mercadolibre.com/items/${item}`)
+    .then((response) => response.json())
+    .then((cartItems) => {
+      DOM.add(cartItems);
+      getProductPrice();
+    })
+    .catch((error) => console.log(error));
   },
 
   // pega o id do produto selecionado
